@@ -1,3 +1,9 @@
+# Action pinning policy (RB-001): every action is pinned to an exact release
+# tag, never a major alias. Major aliases ("@v8") are a per-maintainer
+# convention, not a platform guarantee - setup-uv publishes none and CI died
+# resolving it (D01). Commit-SHA pinning is the next hardening step, worth it
+# when actions come from less-trusted publishers or a team depends on this
+# pipeline; tracked as deferred, not adopted.
 name: ci
 
 on:
@@ -9,7 +15,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.0
       - uses: astral-sh/setup-uv@v8.3.2
         with:
           # Same uv version as local dev.
@@ -22,10 +28,26 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.0
       - uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "0.11.21"
           enable-cache: true
       - run: uv sync --locked
       - run: uv run pytest -q
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: hashicorp/setup-terraform@v4.0.1
+        with:
+          # Same terraform version as local dev.
+          terraform_version: "1.15.8"
+      - run: terraform fmt -check -recursive infra
+      # -backend=false keeps CI free of AWS credentials: validate checks
+      # syntax and internal consistency without touching remote state.
+      - run: terraform -chdir=infra/bootstrap init -backend=false
+      - run: terraform -chdir=infra/bootstrap validate
+      - run: terraform -chdir=infra/foundation init -backend=false
+      - run: terraform -chdir=infra/foundation validate
