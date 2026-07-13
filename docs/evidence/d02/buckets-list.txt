@@ -1,0 +1,13 @@
+$ aws s3 ls --profile edgar | grep edgar-lakehouse
+2026-07-13 09:50:29 edgar-lakehouse-bronze-ba9625e1
+2026-07-13 09:50:29 edgar-lakehouse-gold-ba9625e1
+2026-07-13 09:50:29 edgar-lakehouse-landing-ba9625e1
+2026-07-13 09:50:29 edgar-lakehouse-silver-ba9625e1
+2026-07-13 09:45:15 edgar-lakehouse-tfstate-bd22c07b
+
+$ aws s3api get-public-access-block --bucket <each> --profile edgar
+(all five buckets)
+BlockPublicAcls=true IgnorePublicAcls=true BlockPublicPolicy=true RestrictPublicBuckets=true
+
+$ aws s3 ls s3://edgar-lakehouse-tfstate-bd22c07b/foundation/ --profile edgar
+2026-07-13 09:51:30      33771 terraform.tfstate

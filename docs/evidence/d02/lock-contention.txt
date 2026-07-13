@@ -1,0 +1,30 @@
+Concurrent-plan lock contention test (Terraform 1.15.8, S3 backend, use_lockfile = true)
+
+Setup: a first `terraform plan` was started in the background and held the
+lockfile; a second `terraform plan` was launched 2 seconds later against the
+same state.
+
+=== SECOND (concurrent) PLAN ===
+
+Error: Error acquiring the state lock
+
+Error message: operation error S3: PutObject, https response error
+StatusCode: 412, RequestID: [redacted], HostID: [redacted],
+api error PreconditionFailed: At least one of the pre-conditions you
+specified did not hold
+Lock Info:
+  ID:        50c38226-dcd3-4138-527b-fed74cc72c49
+  Path:      edgar-lakehouse-tfstate-bd22c07b/foundation/terraform.tfstate
+  Operation: OperationTypePlan
+  Who:       [redacted]
+  Version:   1.15.8
+  Created:   2026-07-13 12:52:02.609869 +0000 UTC
+
+Terraform acquires a state lock to protect the state from being written
+by multiple users at the same time.
+
+=== FIRST PLAN (background), final lines ===
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+Releasing state lock. This may take a few moments...

@@ -1,0 +1,33 @@
+infra/bootstrap (state bucket):
+
+Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+state_bucket_name = "edgar-lakehouse-tfstate-bd22c07b"
+
+---
+
+infra/foundation (layer buckets + budgets):
+
+Apply complete! Resources: 19 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+layer_bucket_arns = {
+  "bronze" = "arn:aws:s3:::edgar-lakehouse-bronze-ba9625e1"
+  "gold" = "arn:aws:s3:::edgar-lakehouse-gold-ba9625e1"
+  "landing" = "arn:aws:s3:::edgar-lakehouse-landing-ba9625e1"
+  "silver" = "arn:aws:s3:::edgar-lakehouse-silver-ba9625e1"
+}
+layer_bucket_names = {
+  "bronze" = "edgar-lakehouse-bronze-ba9625e1"
+  "gold" = "edgar-lakehouse-gold-ba9625e1"
+  "landing" = "edgar-lakehouse-landing-ba9625e1"
+  "silver" = "edgar-lakehouse-silver-ba9625e1"
+}
+
+Idempotence check (plan after apply):
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
