@@ -7,7 +7,10 @@ and dashboards. Built in public, delivery by delivery.
 
 ## Project status
 
-**D01, Repository scaffolding & engineering standards** (in progress)
+**D02, Terraform foundation** (in progress) — remote state with native S3
+locking, the four lakehouse layer buckets, and budget alarms provisioned
+before any billable resource. D01 (scaffolding & engineering standards) is
+merged.
 
 ## Why this project
 
@@ -22,7 +25,62 @@ gets made.
 
 ## Architecture
 
-Diagram lands in D02. Decisions are recorded as [ADRs](docs/adr/).
+Full diagram and notes live in [docs/architecture.md](docs/architecture.md);
+decisions are recorded as [ADRs](docs/adr/). Solid nodes exist, dashed ones
+are planned:
+
+```mermaid
+flowchart LR
+  subgraph sources[Sources]
+    stooq[Market prices]
+    edgar[SEC EDGAR API]
+    sim[Quote stream - simulated]
+  end
+
+  subgraph aws[AWS us-east-1]
+    rds[(RDS PostgreSQL)]
+    subgraph s3[S3 lakehouse layers]
+      landing[Landing]
+      bronze[Bronze]
+      silver[Silver]
+      gold[Gold]
+    end
+    budgets[Budget alarms 10/20 USD]
+  end
+
+  subgraph dbx[Databricks Free Edition]
+    spark[PySpark ingestion]
+    dbt[dbt marts]
+    ml[MLflow model]
+  end
+
+  dash[Dashboards: AI/BI + Streamlit]
+
+  stooq --> rds --> landing
+  edgar --> landing
+  sim -.-> landing
+  landing --> bronze --> silver --> gold
+  spark --- bronze
+  spark --- silver
+  dbt --- gold
+  gold --> ml
+  gold --> dash
+
+  classDef built stroke-width:2px
+  classDef planned stroke-dasharray:5 5
+  class landing,bronze,silver,gold,budgets built
+  class stooq,edgar,sim,rds,spark,dbt,ml,dash planned
+```
+
+## Cost guardrails
+
+This project runs on a hard US$30 ceiling. Controls, in order of usefulness:
+ephemeral infrastructure (`terraform destroy` recreates everything in
+minutes), an explicit stop/destroy checkpoint closing every delivery, and
+two AWS Budgets alarms (US$10 / US$20) provisioned as code in
+[`infra/foundation`](infra/foundation) - armed before the first billable
+resource existed. Budget data lags by up to a day; the alarms are
+tripwires, not brakes.
 
 ## Roadmap
 
